@@ -39,7 +39,11 @@ function assertPublicUrl(rawUrl) {
   const blockedExact = new Set(["localhost", "127.0.0.1", "0.0.0.0", "::1"]);
   const privateRanges =
     /^(10\.|172\.(1[6-9]|2\d|3[0-1])\.|192\.168\.|169\.254\.|100\.(6[4-9]|[7-9]\d|1[01]\d|12[0-7])\.)/;
-  if (blockedExact.has(host) || host.endsWith(".local") || privateRanges.test(host)) {
+  if (
+    blockedExact.has(host) ||
+    host.endsWith(".local") ||
+    privateRanges.test(host)
+  ) {
     throw new Error("That address isn't allowed.");
   }
   return parsed;
@@ -58,11 +62,16 @@ export async function POST(req) {
     const rawUrl = body?.url;
 
     if (!rawUrl || typeof rawUrl !== "string") {
-      return NextResponse.json({ error: "Enter a URL first." }, { status: 400 });
+      return NextResponse.json(
+        { error: "Enter a URL first." },
+        { status: 400 },
+      );
     }
 
     const requestedSizes =
-      Array.isArray(body?.sizes) && body.sizes.length > 0 ? body.sizes : PRESET_SIZES;
+      Array.isArray(body?.sizes) && body.sizes.length > 0
+        ? body.sizes
+        : PRESET_SIZES;
     // Hard cap so one request can't be used to spin up dozens of navigations.
     const sizes = requestedSizes.slice(0, 8).map((s, i) => ({
       name: s?.name || `Custom ${i + 1}`,
@@ -73,9 +82,15 @@ export async function POST(req) {
     const normalized = normalizeUrl(rawUrl);
     assertPublicUrl(normalized);
 
-    browser = await chromium.launch({ headless: true });
+    browser = await chromium.launch({
+      headless: true,
+      args: chromium.args,
+      executablePath: await chromium.executablePath(),
+      headless: true,
+    });
     const context = await browser.newContext({
-      userAgent: "Mozilla/5.0 (compatible; FramelyBot/1.0; +https://framely.example/bot)",
+      userAgent:
+        "Mozilla/5.0 (compatible; FramelyBot/1.0; +https://framely.example/bot)",
     });
     const page = await context.newPage();
 
@@ -104,7 +119,8 @@ export async function POST(req) {
     return NextResponse.json({ url: normalized, results });
   } catch (err) {
     if (browser) await browser.close().catch(() => {});
-    const message = err instanceof Error ? err.message : "Screenshot capture failed.";
+    const message =
+      err instanceof Error ? err.message : "Screenshot capture failed.";
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
