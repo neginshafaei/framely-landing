@@ -1,9 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   webpack: (config) => {
-    config.externals.push({
-      "playwright-core": "commonjs playwright-core",
-    });
+    config.externals.push(
+      "playwright-core",
+      "@sparticuz/chromium"
+    );
 
     return config;
   },
