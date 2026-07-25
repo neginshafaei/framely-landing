@@ -1,3 +1,6 @@
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
 import chromium from "@sparticuz/chromium";
 import { chromium as playwright } from "playwright-core";
 import { NextResponse } from "next/server";
