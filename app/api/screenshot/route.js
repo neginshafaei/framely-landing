@@ -1,4 +1,5 @@
-import { chromium } from "playwright";
+import chromium from "@sparticuz/chromium";
+import { chromium as playwright } from "playwright-core";
 import { NextResponse } from "next/server";
 
 // Playwright needs a real Node.js process (spawns a browser binary),
@@ -82,8 +83,7 @@ export async function POST(req) {
     const normalized = normalizeUrl(rawUrl);
     assertPublicUrl(normalized);
 
-    browser = await chromium.launch({
-      headless: true,
+    const browser = await playwright.launch({
       args: chromium.args,
       executablePath: await chromium.executablePath(),
       headless: true,
